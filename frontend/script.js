@@ -3,17 +3,22 @@ function getRandomArbitrary(min, max) {
 }
 
 const socket = io('http://localhost:3000');
+var clientId
 totalUsers = [];
 
-channel = 'morgiovanelli';
+channel = 'edersondeveloper';
 
 socket.on('connect', () => {
-  const clientId = socket.id;
+  clientId = socket.id;
+  socket.emit('connectChannel', { id: clientId, channel: channel });
 
   setInterval(() => {
     socket.emit('getUsers', { id: clientId, channel });
   }, 3000);
   socket.on('users', useUsers);
+  socket.on('changeDeninho', changeDeninho)
+  socket.on('pingDeninho', pingDeninho)
+  socket.on('moveDeninho', moveDeninho)
 });
 
 function useUsers(users) {
@@ -21,17 +26,94 @@ function useUsers(users) {
   totalUsers.forEach(showUsers);
 }
 
-var players = [];
+function changeDeninho(data){
+  foundedIndex = -1
+  deninhos.forEach((deninho, index) => {
+    if (deninho.name == data.nick){
+      foundedIndex = index
+    }
+  })
+
+  if (foundedIndex == -1){
+    return
+  }
+  deninhosPossiblity = ['vampiro', 'denatal', 'dourado', 'normal']
+  if (deninhosPossiblity.includes(data.deno)){
+    deninhos[foundedIndex].changeImage(data.deno)
+    deninhos[foundedIndex].image = data.deno
+  }
+}
+
+function pingDeninho(data){
+  deninhos.forEach((deninho) => {
+    if (deninho.name == data.nick){
+      deninho.changeImage('ping')
+      setTimeout(() => {
+        deninho.changeImage(deninho.image)
+      }, 4000)
+
+    }
+  })
+}
+
+function moveDeninho(data){
+  deninhos.forEach((deninho) => {
+    if (deninho.name == data.nick){
+      switch (data.position){
+        case 'top':
+          position = [displayWidth / 2, 30]
+          break
+        case 'bottom':
+          position = [displayWidth / 2, displayHeight - 30]
+          break
+        case 'left':
+          position = [30, displayHeight / 2]
+          break
+        case 'right':
+          position = [displayWidth - 30, displayHeight / 2]
+          break
+        case 'top-left':
+          position = [30, 30]
+          break
+        case 'top-right':
+          position = [displayWidth - 30, 30]
+          break
+        case 'bottom-left':
+          position = [30, displayHeight - 30]
+          break
+        case 'bottom-right':
+          position = [displayWidth - 30, displayHeight - 30]
+          break
+        case 'center':
+          position = [displayWidth / 2, displayHeight / 2]
+          break
+        default:
+          position = false
+      }
+      console.log(position)
+
+      if (position){
+        deninho.setSpeed(0, 0)
+        deninho.position.x =  position[0]
+        deninho.position.y =  position[1]
+      }
+    }
+  })
+}
 
 var textCanvas;
+var deninhos
 
 function setup() {
+
+  deninhos = new Group()
+
   createCanvas(displayWidth, displayHeight);
   textCanvas = createGraphics(displayWidth, displayHeight);
 
   setInterval(() => {
-    players.forEach(deletePlayers);
     totalUsers.forEach(showUsers);
+    deninhos.forEach(deletePlayers);
     totalUsers = [];
   }, 5000);
 
@@ -40,8 +122,8 @@ function setup() {
 
 function showUsers(user) {
   exists = false;
-  players.forEach((player) => {
-    if (player.name == user) {
+  deninhos.forEach((deninho) => {
+    if (deninho.name == user) {
       exists = true;
     }
   });
@@ -49,37 +131,46 @@ function showUsers(user) {
   if (!exists) {
     x = getRandomArbitrary(0, displayWidth);
     y = getRandomArbitrary(0, displayHeight);
-    img = 'https://i.imgur.com/SfPiDp1.png';
+    denoNormal = loadImage('https://i.imgur.com/SfPiDp1.png')
+    denoVampiro = loadImage('https://i.imgur.com/hvGyfXP.png')
+    denoDenatal = loadImage('https://i.imgur.com/rpkkNFl.png')
+    denoDourado = loadImage('https://i.imgur.com/qlozhP6.png')
+    denoPing = loadImage('https://i.imgur.com/RKCPa0x.png')
 
     denoSprite = createSprite(x, y);
 
-    denoImg = loadImage(img);
-    denoSprite.addImage(denoImg);
+    denoSprite.addImage('normal', denoNormal);
+    denoSprite.addImage('vampiro', denoVampiro);
+    denoSprite.addImage('denatal', denoDenatal);
+    denoSprite.addImage('dourado', denoDourado);
+    denoSprite.addImage('ping', denoPing);
 
+    denoSprite.changeImage('normal')
+    denoSprite.image = 'normal'
     denoSprite.name = user;
-    players.push(denoSprite);
+    deninhos.add(denoSprite)
 
     xOfText = calcXOfText(x, user);
   }
 }
 
 function moveDeninhos() {
-  players.forEach((player, index) => {
+  deninhos.forEach((deninho, index) => {
     x = getRandomArbitrary(0, displayWidth);
     y = getRandomArbitrary(0, displayHeight);
 
-    player.setSpeed(0, 0);
-    player.attractionPoint(0.2, x, y);
+    deninho.setSpeed(0, 0);
+    deninho.attractionPoint(0.2, x, y);
 
-    xOfText = calcXOfText(x, player.name);
+    xOfText = calcXOfText(x, deninho.name);
   });
 }
 
-function deletePlayers(player, index) {
-  if (totalUsers.indexOf(player.name) == -1) {
-    player.remove();
-    delete players[index];
-    socket.emit('exitUser', { id: clientId, user: player.name, channel });
+function deletePlayers(deninho, index) {
+  if (totalUsers.indexOf(deninho.name) == -1) {
+    deninhos[index].remove()
+    deninhos.slice(index, 1)
+    socket.emit('exitUser', { id: clientId, user: deninho.name, channel });
   }
 }
 
@@ -90,13 +181,16 @@ function calcXOfText(x, user) {
 function draw() {
   clear();
 
-  players.forEach((player) => {
+  deninhos.forEach((deninho) => {
     text(
-      player.name,
-      calcXOfText(player.position.x, player.name),
-      player.position.y - 25,
+      deninho.name,
+      calcXOfText(deninho.position.x, deninho.name),
+      deninho.position.y - 25,
     );
   });
+
+  deninhos.collide(deninhos)
+  deninhos.draw()
 
   drawSprites();
 }
