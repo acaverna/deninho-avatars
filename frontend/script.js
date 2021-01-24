@@ -2,7 +2,7 @@ function getRandomArbitrary(min, max) {
   return Math.random() * (max - min) + min;
 }
 
-const socket = io('http://localhost:3000');
+const socket = io('https://deninhoavatars.herokuapp.com:3000/');
 var clientId
 totalUsers = [];
 
