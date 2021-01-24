@@ -8,11 +8,11 @@
     reconnect: true
   },
 identity: {
-    username: 'edersondeveloper',
-    password: 'oauth:dk4liec9dgbhdsxgqmc0n5dxgrbgtg'
+    username: '',
+    password: ''
   },
 
-  channels: ['edersondeveloper']
+  channels: ['davibusanello']
 }
 
 module.exports = options

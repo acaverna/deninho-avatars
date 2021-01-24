@@ -20,6 +20,10 @@ socket.on('connect', () => {
     socket.emit('connectChannel', { id: clientId, channel: channel });
   });
 
+  socket.on('exitUser', (socket) => {
+    console.log(socket)
+  })
+
   client.on('chat', (channel, user, message, self) => {
     messageSplited = message.split(' ')
     if (messageSplited[0] == '!deninho' && messageSplited.length == 2) {

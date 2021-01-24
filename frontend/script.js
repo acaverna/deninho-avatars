@@ -6,7 +6,7 @@ const socket = io('http://localhost:3000');
 var clientId
 totalUsers = [];
 
-channel = 'edersondeveloper';
+channel = 'davibusanello';
 
 socket.on('connect', () => {
   clientId = socket.id;
@@ -24,6 +24,7 @@ socket.on('connect', () => {
 function useUsers(users) {
   totalUsers = users;
   totalUsers.forEach(showUsers);
+  console.log(totalUsers)
 }
 
 function changeDeninho(data){
@@ -114,7 +115,6 @@ function setup() {
   setInterval(() => {
     totalUsers.forEach(showUsers);
     deninhos.forEach(deletePlayers);
-    totalUsers = [];
   }, 5000);
 
   setInterval(moveDeninhos, 10000);
@@ -168,6 +168,7 @@ function moveDeninhos() {
 
 function deletePlayers(deninho, index) {
   if (totalUsers.indexOf(deninho.name) == -1) {
+    console.log(totalUsers)
     deninhos[index].remove()
     deninhos.slice(index, 1)
     socket.emit('exitUser', { id: clientId, user: deninho.name, channel });

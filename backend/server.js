@@ -75,6 +75,8 @@ function exitUser(socket){
   clientId = socket.id
   clientChannel = socket.channel.toLowerCase()
   userExited = socket.user
+  
+  console.log("Pessoa " +  userExited + " Saiu")
 
   socketConnected = clients.get(clientId)
   if (!socketConnected){
@@ -94,7 +96,6 @@ function changeDeninho(socket){
 }
 
 function pingDeninho(socket){
-  console.log(socket)
   nick = socket.nick
   channel = socket.url.replace('#','')
 
@@ -102,7 +103,6 @@ function pingDeninho(socket){
 }
 
 function moveDeninho(socket){
-  console.log(socket)
   nick = socket.nick
   position = socket.position
   channel = socket.url.replace('#','')
