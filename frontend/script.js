@@ -2,11 +2,12 @@ function getRandomArbitrary(min, max) {
   return Math.random() * (max - min) + min;
 }
 
-const socket = io('https://deninhoavatars.herokuapp.com:3000/');
+const socket = io('https://deninhoavatars-backend.herokuapp.com/');
 var clientId
 totalUsers = [];
 
-channel = 'davibusanello';
+const urlParams = new URLSearchParams(window.location.search);
+channel = urlParams.get('channel');
 
 socket.on('connect', () => {
   clientId = socket.id;

@@ -28,9 +28,15 @@ io.on('connection', (socket) => {
   socket.on('moveDeninho', moveDeninho)
   socket.on('changeDeninho', changeDeninho)
 
+  io.on('disconnect', () => {
+    clients.delete(socket)
+  });
 });
 
 function connectChannel(socket){
+  if (socket.id == null || socket.channel == null || socket.id == undefined || socket.channel == undefined){
+    return
+  }
   clientId = socket.id
   clientChannel = socket.channel.toLowerCase()
 
@@ -44,6 +50,9 @@ function connectChannel(socket){
 }
 
 function getUsers(socket){
+  if (socket.id == null || socket.channel == null || socket.id == undefined || socket.channel == undefined){
+    return
+  }
   clientId = socket.id
   clientChannel = socket.channel.toLowerCase()
 
@@ -71,7 +80,9 @@ function getUsers(socket){
 }
 
 function exitUser(socket){
-
+  if (socket.id == null || socket.channel == null || socket.id == undefined || socket.channel == undefined){
+    return
+  }
   clientId = socket.id
   clientChannel = socket.channel.toLowerCase()
   userExited = socket.user
@@ -88,6 +99,9 @@ function exitUser(socket){
 }
 
 function changeDeninho(socket){
+  if (socket.id == null || socket.channel == null || socket.id == undefined || socket.channel == undefined){
+    return
+  }
   deno = socket.deno
   nick = socket.nick
   channel = socket.url.replace('#','')
@@ -103,6 +117,9 @@ function pingDeninho(socket){
 }
 
 function moveDeninho(socket){
+  if (socket.nick == null || socket.position == null || socket.nick == undefined || socket.position == undefined){
+    return
+  }
   nick = socket.nick
   position = socket.position
   channel = socket.url.replace('#','')
@@ -111,6 +128,6 @@ function moveDeninho(socket){
   io.to(channel).emit('moveDeninho', {nick, position})
 }
 
-http.listen(3000, () => {
-  console.log('listening on *:3000');
+http.listen(process.env.PORT || 3000, () => {
+  console.log('listening');
 });
