@@ -48,7 +48,7 @@ To move certain Deninho, emit `moveDeninho`, passing the nick of the user, the p
 ```javascript
 socket.emit('moveDeninho', {
   nick: "davibusanello",
-  url: "ytapioca",
+  url: "chicocodes",
   position: "bottom"
 })
 ```
